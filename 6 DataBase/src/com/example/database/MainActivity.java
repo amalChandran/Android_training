@@ -14,7 +14,10 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -25,24 +28,42 @@ public class MainActivity extends Activity {
 		private List<Contacts> contactList;
 		StringBuilder sb;
 		Contacts contact;
-		String json="{\"id\":12,\"name\": \"novasys\",\"phoneNumber\":\"903222\"}";
+		Button b;
+		String json="{\"id\":123,\"name\": \"nam3\",\"phoneNumber\":\"000000\"}";
+		DBHandler dbh;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+		b=(Button) findViewById(R.id.button1);
 		//1 converting from json to pojo
 		jsonToPojo(json);
 		
-		//2 from pojo to database
-		DBHandler dbh=new DBHandler(this, DATABASE_NAME, null, DATABASE_VERSION);
+		//2 inserting pojo to database
+		dbh=new DBHandler(this, DATABASE_NAME, null, DATABASE_VERSION);
+		dbh.addContact(contact);
+		dbh.addContact(contact);
+		dbh.addContact(contact);
+		dbh.addContact(contact);
 		dbh.addContact(contact);
 		
-		//3 from database to log info :)
-		contactList=dbh.getAllContacts();
-		for(int i=0;i<contactList.size();i++){
-			Log.i(contactList.get(i).getName(), contactList.get(i).getPhoneNumber());
-		}
+		showAllContacts();
+		//udpating the database value with the id
+		b.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				/* "updateRow()" will perform the two operation as follows.
+				 * 1.insert new object to table with id=1 and 2.
+				 * 2.it reads the row from table with id=(second parameter) and displays in log.
+				 * Even if one of the transaction goes wrong! then it will be rolled back, else comitted.
+				 */
+				dbh.updateRow(new Contacts("updated", "11111111111"), 100);
+				showAllContacts();				
+			}
+		});
+	
+		
 		
 	}
 	
@@ -53,8 +74,14 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
-	private void jsonToPojo(String json){
+private void showAllContacts(){
+	//3 from database to log info :)
+			contactList=dbh.getAllContacts();
+			for(int i=0;i<contactList.size();i++){
+				Log.i(""+contactList.get(i).getId(), contactList.get(i).getName()+"--"+contactList.get(i).getPhoneNumber());
+			}
+}
+private void jsonToPojo(String json){
 	       ObjectMapper mapper=new ObjectMapper();
 			
 			try {

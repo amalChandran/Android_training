@@ -8,7 +8,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DBHandler extends SQLiteOpenHelper{
    //Data base version
@@ -45,10 +47,20 @@ public class DBHandler extends SQLiteOpenHelper{
     void addContact(Contacts contact){
     	SQLiteDatabase db=this.getWritableDatabase();
     	ContentValues cv=new ContentValues();
-    	
     	cv.put(KEY_NAME, contact.getName() );
     	cv.put(KEY_PH_NO, contact.getPhoneNumber());
-    	db.insert(TABLE_CONTACTS, null, cv);
+    	//**************************************************************COMMIT/REVERT***************************************************
+    	try {
+    		db.beginTransaction();
+        	db.insert(TABLE_CONTACTS, null, cv);
+        	Log.i("Transaction", "Comitted");
+        	db.setTransactionSuccessful();
+   
+		} catch (SQLiteException e) {
+		      Log.e("SQLite exception", "rollback");
+		}finally{
+			db.endTransaction();
+		}
     	db.close();
     }
    //to get all the contacts from the contacts table
@@ -68,6 +80,36 @@ public class DBHandler extends SQLiteOpenHelper{
     	}
     	db.close();
 		return contactList;
+    }
+    //************************************************************updates two ids, even if one id is wrong it will roll back both the transaction.
+    public int updateRow(Contacts contacts,int id){
+    	int i,j;
+    	SQLiteDatabase db=this.getWritableDatabase();
+    	ContentValues cv=new ContentValues();
+    	cv.put(KEY_NAME, contacts.getName());
+    	cv.put(KEY_PH_NO, contacts.getPhoneNumber());
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    		db.beginTransaction();
+    		//******************************************************************************
+        	i=db.update(TABLE_CONTACTS, cv, KEY_ID+" = ?", new String[]{String.valueOf(1)});
+        	j=db.update(TABLE_CONTACTS, cv, KEY_ID+" = ?", new String[]{String.valueOf(id)});
+        	//******************************************************************************
+        	Cursor cursor=db.query(TABLE_CONTACTS, new String[]{KEY_ID,KEY_NAME,KEY_PH_NO}, KEY_ID+" = ?", new String[]{String.valueOf(2)}, null, null, null,null);
+        	
+        	if(i==1&&j==1&&cursor!=null){
+        		cursor.moveToFirst();
+        		Log.i("returned val", cursor.getString(1)+"---"+cursor.getString(2));
+        		Log.e("Transaction:", "Comitted");
+        		db.setTransactionSuccessful();
+        	}else{
+        		Log.e("Transaction:", "Rolled back/Reverted");
+        	}
+		
+			
+			db.endTransaction();
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+		return id;
+    	
     }
 
 }
