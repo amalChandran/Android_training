@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 
 import android.os.Bundle;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +32,7 @@ public class MainActivity extends Activity {
 		Button b;
 		String json="{\"id\":123,\"name\": \"nam3\",\"phoneNumber\":\"000000\"}";
 		DBHandler dbh;
+	@SuppressLint("ShowToast")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,13 +42,16 @@ public class MainActivity extends Activity {
 		jsonToPojo(json);
 		
 		//2 inserting pojo to database
+		
 		dbh=new DBHandler(this, DATABASE_NAME, null, DATABASE_VERSION);
 		dbh.addContact(contact);
 		dbh.addContact(contact);
 		dbh.addContact(contact);
 		dbh.addContact(contact);
 		dbh.addContact(contact);
-		
+		// return count for the number of entries whose id is greater than 2
+		Toast.makeText(getApplicationContext(), ""+dbh.getContactsCount(), 0).show();
+		Log.i("Count ", dbh.getContactsCount()+"");
 		showAllContacts();
 		//udpating the database value with the id
 		b.setOnClickListener(new OnClickListener() {

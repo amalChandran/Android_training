@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
@@ -93,12 +94,17 @@ public class DBHandler extends SQLiteOpenHelper{
         	}else{
         		Log.e("Transaction:", "Rolled back/Reverted");
         	}
-		
-			
 			db.endTransaction();
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
 		return id;
-    	
+    }
+    //to get contacts
+    public int getContactsCount() {
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+ 
+        // return count for the number of entries whose id is greater than 2
+        return  (int) DatabaseUtils.queryNumEntries(db, TABLE_CONTACTS,KEY_ID+">?", new String[] {String.valueOf(2)});
     }
 
 }
