@@ -49,18 +49,7 @@ public class DBHandler extends SQLiteOpenHelper{
     	ContentValues cv=new ContentValues();
     	cv.put(KEY_NAME, contact.getName() );
     	cv.put(KEY_PH_NO, contact.getPhoneNumber());
-    	//**************************************************************COMMIT/REVERT***************************************************
-    	try {
-    		db.beginTransaction();
-        	db.insert(TABLE_CONTACTS, null, cv);
-        	Log.i("Transaction", "Comitted");
-        	db.setTransactionSuccessful();
-   
-		} catch (SQLiteException e) {
-		      Log.e("SQLite exception", "rollback");
-		}finally{
-			db.endTransaction();
-		}
+    	db.insert(TABLE_CONTACTS, null, cv);
     	db.close();
     }
    //to get all the contacts from the contacts table
